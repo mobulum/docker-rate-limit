@@ -14,9 +14,9 @@ EOF
   " > $OUTPUT
 }
 
-if [ -e "$GOPATH/example.yaml.source" ]
+if [ -e "$CONFIG_FILE_PATH.source" ]
 then
-  replace_vars "$GOPATH/example.yaml.source"
+  replace_vars "$CONFIG_FILE_PATH.source"
 fi
 
 echo "Configuration settings"
