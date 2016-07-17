@@ -1,0 +1,90 @@
+# Validate this file by running `bin/sphinxd --validate /path/to/conf`
+proxy:
+  handler: http             # can be {http,httplogger}
+  host: http://httpbin.org  # URI for the http(s) backend we are proxying to
+  listen: :6634             # bind to host:port. default: height of the Great Sphinx of Giza
+  allow-on-error: Yes       # become passive proxy if error detected? (optional, default=No)
+
+storage:
+  type: memory    # can be {redis,memory}
+  host: localhost # redis hostname. not required for memory
+  port: 6379      # redis port.     not required for memory
+
+health-check:
+  enabled: true
+  port: 60002
+  endpoint: "/health/check"
+
+limits:
+  bearer-special:
+    interval: 15  # in seconds
+    max: 200      # number of requests allowed in interval
+    keys:
+      # buckets are keyed on concatnated values of these params
+      headers:
+        encrypt: "the_salt"
+        names:
+          - "Authorization"
+      ip: ""      # ip keys require no configuration
+    matches:
+      # both headers and paths matches should be true for limit to apply
+      headers:
+        match_any:
+          - name: "Authorization"
+            match: "Bearer.*"
+          - name: "X-Forwarded-For"
+      paths:
+        match_any:
+          - "/special/resources/.*"
+
+  basic-simple:
+    interval: 15
+    max: 200
+    keys:
+      headers:
+        names:
+          - "Authorization"
+    matches:
+      headers:
+        match_any:
+          - name: "Authorization"
+            match: "Basic.*"
+    excludes:
+       # excludes are evaluated before matches and requests that
+       # match excludes are ignored
+      paths:
+        match_any:
+          - "/special/resources/.*"
+
+  basic-special:
+    interval: 15
+    max: 200
+    keys:
+      headers:
+        names:
+          - "Authorization"
+    matches:
+      paths:
+        match_any:
+          - "/special/resources/.*"
+      headers:
+        match_any:
+          - name: "Authorization"
+            match: "Basic.*"
+
+  bearer-simple:
+    interval: 15
+    max: 200
+    keys:
+      headers:
+        names:
+          - "Authorization"
+    matches:
+      headers:
+        match_any:
+          - name: "Authorization"
+            match: bearer
+    excludes:
+      paths:
+        match_any:
+          - "/special/resources/.*"
